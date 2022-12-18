@@ -98,7 +98,7 @@ foreach ($categories as $category)
 	{
 		$name = trim($name);
 
-		$products[$i][$j]['name'] = ucwords($name);
+		$products[$i][$j]['name'] = Transliterator::create('tr-title')->transliterate($name);
 		$products[$i][$j]['slug'] = permalink($name);
 		$j++;
 	}
@@ -112,7 +112,7 @@ foreach ($categories as $category)
 	{
 		$explode = explode('<i class="fa fa-try"></i>', $price);
 
-		$products[$i][$j]['price'] = $explode[0];
+		$products[$i][$j]['price'] = turkishLira($explode[0]);
 		$j++;
 	}
 
@@ -146,59 +146,117 @@ foreach ($products as $product)
 
 // Columns array
 $columns = [
-	'product_id',
-	'name(tr-tr)',
-	'categories',
-	'sku',
-	'upc',
-	'ean',
-	'jan',
-	'isbn',
-	'mpn',
-	'location',
-	'quantity',
-	'model',
-	'manufacturer',
-	'image_name',
-	'shipping',
-	'price',
-	'points',
-	'date_added',
-	'date_modified',
-	'date_available',
-	'weight',
-	'weight_unit',
-	'length',
-	'width',
-	'height',
-	'length_unit',
-	'status',
-	'tax_class_id',
-	'description(tr-tr)',
-	'meta_title(tr-tr)',
-	'meta_description(tr-tr)',
-	'meta_keywords(tr-tr)',
-	'stock_status_id',
-	'store_ids',
-	'layout',
-	'related_ids',
-	'tags(tr-tr)',
-	'sort_order',
-	'subtract',
-	'minimum'
+	'product_id' => 'integer',
+	'name(tr-tr)' => 'string',
+	'categories' => 'integer',
+	'sku' => 'integer',
+	'upc' => 'string',
+	'ean' => 'string',
+	'jan' => 'string',
+	'isbn' => 'string',
+	'mpn' => 'string',
+	'location' => 'string',
+	'quantity' => 'integer',
+	'model' => 'string',
+	'manufacturer' => 'string',
+	'image_name' => 'string',
+	'shipping' => 'string',
+	'price' => 'string',
+	'points' => 'integer',
+	'date_added' => 'string',
+	'date_modified' => 'string',
+	'date_available' => 'string',
+	'weight' => 'integer',
+	'weight_unit' => 'string',
+	'length' => 'integer',
+	'width' => 'integer',
+	'height' => 'integer',
+	'length_unit' => 'string',
+	'status' => 'string',
+	'tax_class_id' => 'integer',
+	'description(tr-tr)' => 'string',
+	'meta_title(tr-tr)' => 'string',
+	'meta_description(tr-tr)' => 'string',
+	'meta_keywords(tr-tr)' => 'string',
+	'stock_status_id' => 'integer',
+	'store_ids' => 'integer',
+	'layout' => 'string',
+	'related_ids' => 'string',
+	'tags(tr-tr)' => 'string',
+	'sort_order' => 'integer',
+	'subtract' => 'string',
+	'minimum' => 'integer'
 ];
 
 $data = [];
 
-$start = 800;
+$start = 726;
 
 foreach ($output as $product)
 {
+	/*if (!file_exists('excel/images'))
+	{
+		mkdir('excel/images', 0777, true);
+	}
+
+	file_put_contents(
+		'excel/images/' . $product['slug'] . '.jpg',
+		file_get_contents($product['image'])
+	);*/
+
 	$data[] = [
 		'product_id' => $start,
-		'name(tr-tr)' => $product['name']
+		'name(tr-tr)' => $product['name'],
+		'categories' => 68,
+		'sku' => 2,
+		'upc' => '',
+		'ean' => '',
+		'jan' => '',
+		'isbn' => '',
+		'mpn' => '',
+		'location' => '',
+		'quantity' => 0,
+		'model' => 'T00' . ($start - 5),
+		'manufacturer' => 'Mecitefendi',
+		'image_name' => 'catalog/urunler/mecitefendi/' . $product['slug'] . '.jpg',
+		'shipping' => 'yes',
+		'price' => $product['price'],
+		'points' => 0,
+		'date_added' => date('Y-m-d H:i:s'),
+		'date_modified' => date('Y-m-d H:i:s'),
+		'date_available' => '2022-08-09',
+		'weight' => '0,00',
+		'weight_unit' => 'kg',
+		'length' => 0,
+		'width' => 0,
+		'height' => 0,
+		'length_unit' => 'cm',
+		'status' => 'true',
+		'tax_class_id' => 0,
+		'description(tr-tr)' => 'Açıklama.',
+		'meta_title(tr-tr)' => $product['name'],
+		'meta_description(tr-tr)' => $product['name'],
+		'meta_keywords(tr-tr)' => $product['name'],
+		'stock_status_id' => 5,
+		'store_ids' => 0,
+		'layout' => '',
+		'related_ids' => '',
+		'tags(tr-tr)' => tagCloud($product['name']),
+		'sort_order' => 1,
+		'subtract' => 'true',
+		'minimum' => 1
 	];
+
+	$start++;
 }
 
-echo '<pre>';
-print_r($output);
+try
+{
+	exportExcel('products-' . date('Y-m-d'), $columns, $data);
+
+	echo 'Dışarı aktarma işlemi başarıyla tamamlandı.';
+}
+catch (Exception $e)
+{
+	echo 'Bir hata oluştu ve dışarı aktarılamadı: ' . $e;
+}
