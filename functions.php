@@ -1,5 +1,8 @@
 <?php
 
+require_once('php_image_magician.php');
+require('xlsxwriter.class.php');
+
 function connect($url)
 {
 	$curl = curl_init();
@@ -13,46 +16,25 @@ function connect($url)
 	return $output;
 }
 
-function exportExcel($filename, $columns = array(), $data = array(), $replaceDotCol = array())
+function exportExcel($name, $columns = [], $data = [])
 {
-	header('Content-Encoding: UTF-8');
-	header('Content-Type: text/plain; charset=utf-8');
-	header('Content-disposition: attachment; filename=' . $filename. '.xlsx');
+	$fname =  'excel/' . $name . '.xlsx';
 
-	echo "\xEF\xBB\xBF"; // UTF-8 BOM
+	$writer = new XLSXWriter();
+	$writer->setAuthor('Emin Arif Pirinç');
+	$writer->writeSheet($data,'Products', $columns);
+	$writer->writeToFile($fname);
+}
 
-	$say = count($columns);
+function turkishLira($par)
+{
+	return number_format($par, 2, ',', '.');
+}
 
-	echo '<table>';
-	echo '<tr>';
-
-	foreach ($columns as $v)
-	{
-		echo '<th>' . trim($v) . '</th>';
-	}
-
-	echo '</tr>';
-
-	foreach ($data as $val)
-	{
-		echo '<tr>';
-
-		for ($i=0; $i < $say; $i++)
-		{
-			if (in_array($i, $replaceDotCol))
-			{
-				echo '<td>' . str_replace('.', ',', $val[$i]) . '</td>';
-			}
-			else
-			{
-				echo '<td>' . $val[$i] . '</td>';
-			}
-		}
-
-		echo '</tr>';
-	}
-
-	echo '</table>';
+function tagCloud($tags, $joinWith = ',')
+{
+	$words = explode(' ', $tags);
+	return implode(',', $words);
 }
 
 function permalink($str, $options = array())
@@ -151,3 +133,5 @@ function permalink($str, $options = array())
 
 	return $options['lowercase'] ? mb_strtolower($str, 'UTF-8') : $str;
 }
+
+
